@@ -1,0 +1,203 @@
+<div class="cmd cmd-widget cursor" data-type="info" data-subtype="numeric" data-template="switch" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-eqLogic_id="#eqLogic_id#">
+    <div class="title #hide_name#">
+        <div class="cmdName">#name_display#</div>
+    </div>
+    <div class="content-sm">
+        <span class="cont" style="display: inline-flex;"></span>
+    </div>
+    <template>
+        <div>maxHeight : 150 ({{Hauteur maximale en pixel}})</div>
+        <div>maxWidth : 150 ({{Largeur maximale en pixel}})</div>
+        <div>days : 3 ({{Nombre de jours à afficher}})</div>
+        <div>groupType : sum::hour ({{Groupement des barres à afficher}})</div>
+    </template>
+    <script src="core/php/getJS.php?file=plugins/beem/3rdparty/variable-pie.js" type="text/javascript"></script>
+    <script>
+        var cmd_height = is_numeric('#maxHeight#') ? parseFloat('#maxHeight#') : 160;
+        var cmd_width = is_numeric('#width#') ? parseFloat('#width#') : 160;
+        var days_to_print = is_numeric('#days#') ? parseFloat('#days#') : 3;
+        var group_type = !isNaN('#groupType#') ? '#groupType#' : 'sum::hour';
+
+        const getXDaysBefore = (nbDay = 1) => (
+            new Date(Date.now() - nbDay * 864e5).toISOString().slice(0, 10)
+        );
+
+        function pieColors(rprice, qty) {
+            return Object.entries(rprice)
+                .sort(([, a], [, b]) => Math.abs(b - qty) - Math.abs(a - qty))
+                .pop()[0];
+        }
+
+        function drawVariablePie(_options) {
+            $.ajax({
+                type: "POST",
+                url: "core/ajax/cmd.ajax.php",
+                data: {
+                    action: "getHistory",
+                    id: '#id#',
+                    dataRange: '1 day',
+                    dateStart: _options.start,
+                    dateEnd: _options.end,
+                    derive: '',
+                    allowZero: 0,
+                    groupingType: _options.groupType,
+                    lastPointToEnd: 0,
+                    allowFuture: 0,
+                    addFirstPreviousValue: 0
+                },
+                dataType: 'json',
+                global: true,
+                error: function(request, status, error) {
+                    handleAjaxError(request, status, error);
+                },
+                success: function(data) {
+                    if (data.state != 'ok') {
+                        jeedomUtils.showAlert({
+                            message: data.result,
+                            level: 'danger'
+                        });
+                        return;
+                    }
+                    if (data.result.data.length < 1) {
+                        if (_params.option.displayAlert == false) {
+                            return
+                        }
+                        if (!_params.noError) {
+                            var message = '{{Il n\'existe encore aucun historique pour cette commande :}} ' + data.result.history_name;
+                            if (init(data.result.dateStart) != '') {
+                                message += (init(data.result.dateEnd) != '') ? ' {{du}} ' + data.result.dateStart + ' {{au}} ' + data.result.dateEnd : ' {{à partir de}} ' + data.result.dateStart;
+                            } else {
+                                message += (init(data.result.dateEnd) != '') ? ' {{jusqu\'au}} ' + data.result.dateEnd : '';
+                            }
+                            jeedomUtils.showAlert({
+                                message: message,
+                                level: 'warning'
+                            });
+                            if (typeof(init(_params.success)) === 'function') {
+                                _params.success({
+                                    'error': message
+                                })
+                            }
+                        }
+                        return
+                    }
+
+                    var minVal = data.result.data[0][1];
+                    var maxVal = data.result.data[0][1];
+                    data.result.data.forEach(function(prev) {
+                        if (maxVal < prev[1]) maxVal = prev[1];
+                        if (minVal > prev[1]) minVal = prev[1];
+                    })
+                    var countsArr = {
+                        green: minVal,
+                        orange: (maxVal + minVal) / 2,
+                        red: maxVal
+                    }
+
+                    var series = [];
+                    for (var i in data.result.data) {
+                        series.push({
+                            color: pieColors(countsArr, data.result.data[i][1]),
+                            y: data.result.data[i][0],
+                            z: data.result.data[i][1],
+                            title: ''
+                        });
+                    };
+
+                    Highcharts.chart(_options.id, {
+                        chart: {
+                            spacingTop: 0,
+                            spacingRight: 0,
+                            spacingBottom: 0,
+                            spacingLeft: 0,
+                            plotBorderWidth: 0,
+                            margin: [0, 0, 0, 0],
+                            height: _options.height,
+                            width: _options.width,
+                            type: 'variablepie',
+                            events: {
+                                load: function() {
+                                    var fontSize = (this.chartWidth < 190) ? '10px' : '12px';
+                                    var ecart = this.chartHeight / 7;
+                                    this.renderer.text('0h', this.chartWidth / 2, this.chartHeight / 2 - ecart).attr({
+                                        align: 'center',
+                                        'font-size': fontSize
+                                    }).add()
+                                    this.renderer.text('6h', this.chartWidth / 2 + ecart, this.chartHeight / 2).attr({
+                                        align: 'center',
+                                        'font-size': fontSize
+                                    }).add()
+                                    this.renderer.text('12h', this.chartWidth / 2, this.chartHeight / 2 + ecart).attr({
+                                        align: 'center',
+                                        'font-size': fontSize
+                                    }).add()
+                                    this.renderer.text('18h', this.chartWidth / 2 - ecart, this.chartHeight / 2).attr({
+                                        align: 'center',
+                                        'font-size': fontSize
+                                    }).add()
+                                }
+                            }
+                        },
+                        title: {
+                            floating: true,
+                            text: _options.printDay,
+                            margin: 0,
+                            style: {
+                                "color": "#333333",
+                                "fontSize": "8px"
+                            }
+                        },
+                        tooltip: {
+                            pointFormatter: function() {
+                                return '<span style="color:' + this.color + '">' +
+                                    Highcharts.dateFormat('%d-%m-%Y %H:%M', this.y) + '</span><br/>' +
+                                    '<b>' + Highcharts.numberFormat(this.z) + ' Wh</b>';
+                            },
+                            headerFormat: ''
+                        },
+                        plotOptions: {
+                            variablepie: {
+                                size: _options.height * 0.8,
+                                dataLabels: {
+                                    enabled: false
+                                }
+                            }
+                        },
+                        exporting: {
+                            enabled: false
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        subtitle: false,
+                        series: [{
+                            minPointSize: 10,
+                            innerSize: '50%',
+                            zMin: 0,
+                            name: 'Consommation',
+                            sizeBy: 'radius',
+                            data: series
+                        }]
+                    });
+                }
+            });
+        }
+
+        if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
+            for (var i = days_to_print; i >= 1; i--) {
+                cmd.querySelector('.cont').innerHTML += '<span id="variablePie' + i + '"></span>';
+                let array = {
+                    id: 'variablePie' + i,
+                    groupType: group_type,
+                    height: cmd_height,
+                    width: cmd_width,
+                    days: days_to_print,
+                    printDay: i === 1 ? 'Hier' : i === 2 ? 'Avant-hier' : `Il y a ${i} j`,
+                    end: getXDaysBefore(i),
+                    start: getXDaysBefore(i + 1),
+                };
+                drawVariablePie(array);
+            }
+        }
+    </script>
+</div>
