@@ -1,5 +1,5 @@
 # cmd.info.numeric.consoDaily
-![Dashboard hover](/img/DashboardHover.gif)
+![Dashboard hover](/img/DashboardCarousel.gif)
 
 Widget pour commande info numeric.
 
