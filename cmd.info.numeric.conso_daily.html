@@ -2,15 +2,70 @@
     <div class="title #hide_name#">
         <div class="cmdName">#name_display#</div>
     </div>
-    <div class="content-sm">
-        <span class="cont" style="display: inline-flex;"></span>
-    </div>
+    <div id="conso-#id#-container">
+        <div id="consoDaily#uid#" class="carousel slide conso-#id#-space" data-ride="carousel" data-pause="hover" data-interval="false">
+          <ol class="carousel-indicators">
+          </ol>
+          <div class="carousel-inner slide#id#" id="contain">
+          </div>
+            <a class="left carousel-control my#id#" href="#consoDaily#uid#" data-slide="prev"
+                style="background:transparent">
+                <i #hidden# class="fas fa-chevron-left"></i>
+            </a>
+            <a class="right carousel-control my#id#" href="#consoDaily#uid#" data-slide="next"
+                style="background:transparent">
+                <i #hidden# class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+     </div>
+  <style>
+    
+      #consoDaily#uid# .carousel-indicators li {
+          width: 16px;
+          height: 4px;
+          background-color: grey;
+      }
+
+      #consoDaily#uid# .carousel-indicators li.active {
+          background-color: black;
+
+      }
+
+      #consoDaily#uid# .carousel-indicators  {
+          bottom: 8px;
+          width: 100%;
+          margin-left: -50%;
+      }
+
+      .conso-#id#-row {
+          display: flex;
+          align-items: center;
+          flex-direction: row;
+          justify-content: space-evenly;
+      }
+
+      #consoDaily#uid# > .carousel-control {
+          position: absolute;
+          top: 25%;
+          z-index: 5;
+          display: inline-block;
+          margin-top: 0px;
+          width: 15px;
+      }
+
+      #consoDaily#uid# {
+          margin-top: 5px;
+      }
+      
+  </style>
+
     <template>
         <div>maxHeight : 150 ({{Hauteur maximale en pixel}})</div>
         <div>maxWidth : 150 ({{Largeur maximale en pixel}})</div>
         <div>days : 3 ({{Nombre de jours à afficher}})</div>
         <div>groupType : sum::hour ({{Groupement des barres à afficher}})</div>
     </template>
+
     <script src="core/php/getJS.php?file=plugins/beem/3rdparty/variable-pie.js" type="text/javascript"></script>
     <script>
         var cmd_height = is_numeric('#maxHeight#') ? parseFloat('#maxHeight#') : 160;
@@ -18,7 +73,7 @@
         var days_to_print = is_numeric('#days#') ? parseFloat('#days#') : 3;
         var group_type = !isNaN('#groupType#') ? '#groupType#' : 'sum::hour';
 
-        const getXDaysBefore = (nbDay = 1) => (
+        const getDaysBefore = (nbDay = 1) => (
             new Date(Date.now() - nbDay * 864e5).toISOString().slice(0, 10)
         );
 
@@ -184,8 +239,21 @@
         }
 
         if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
+            let html = '';
+            let htmlCarou = '';
             for (var i = days_to_print; i >= 1; i--) {
-                cmd.querySelector('.cont').innerHTML += '<span id="variablePie' + i + '"></span>';
+                var active = (i == 1)?'active':'';
+                html += '<div class="item '+active+'" data-interval="15000">';
+                html += '    <div id="variablePie' + i + '" class="conso-#id#-row">';
+                html += '    </div>';
+                html += '</div>';
+              
+                htmlCarou += '<li data-target="#consoDaily#uid#" data-slide-to="'+(days_to_print-i)+'" class="'+active+'"></li>'
+            }
+            cmd.querySelector('#contain').innerHTML += html;
+            cmd.querySelector('.carousel-indicators').innerHTML += htmlCarou;
+
+            for (var i = days_to_print; i >= 1; i--) {
                 let array = {
                     id: 'variablePie' + i,
                     groupType: group_type,
@@ -193,11 +261,21 @@
                     width: cmd_width,
                     days: days_to_print,
                     printDay: i === 1 ? 'Hier' : i === 2 ? 'Avant-hier' : `Il y a ${i} j`,
-                    end: getXDaysBefore(i),
-                    start: getXDaysBefore(i + 1),
+                    end: getDaysBefore(i),
+                    start: getDaysBefore(i + 1),
                 };
                 drawVariablePie(array);
             }
         }
+
+        $('.right.carousel-control.my#id#').on('click', function () {
+            $('#consoDaily#uid#').carousel('next');
+            console.log('carou right',$('#consoDaily#uid#'))
+        });
+
+        $('.left.carousel-control.my#id#').on('click', function () {
+            $('#consoDaily#uid#').carousel('prev');
+            console.log('carou left',$('#consoDaily#uid#'))
+        });
     </script>
 </div>
