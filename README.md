@@ -12,6 +12,7 @@ Configurable dans les paramètres optionnels du widget :
 - maxWidth : 150 (Largeur maximale en pixel)
 - days : 3 (Nombre de jours à afficher)
 - groupType : sum::hour (Groupement des barres à afficher)
+- inner : 60 (Largeur de la part)
 
 Importer les modules suivants et pointer leur emplacement dans le code.
 https://code.highcharts.com/modules/variable-pie.js
