@@ -78,7 +78,7 @@
         var cmd_width = is_numeric('#width#') ? parseFloat('#width#') : 160;
         var days_to_print = is_numeric('#days#') ? parseFloat('#days#') : 3;
         var group_type = !isNaN('#groupType#') ? '#groupType#' : 'sum::hour';
-        const pie_size = is_numeric('#inner#') && '#inner#' >= 25 ? '#inner#' <= 80 ? '#inner#' : 80 : 25;
+        const pie_size = is_numeric('#inner#') && '#inner#' >= 25 ? '#inner#' <= 80 ? '#inner#' : 80 : 60;
         const getDaysBefore#id# = (nbDay = 1) => (
             new Date(Date.now() - nbDay * 864e5).toISOString().slice(0, 10)
         );
