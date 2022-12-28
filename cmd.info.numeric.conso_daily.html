@@ -19,7 +19,7 @@
         </div>
      </div>
   <style>
-    
+
       #consoDaily#uid# .carousel-indicators li {
           width: 16px;
           height: 4px;
@@ -46,8 +46,6 @@
 
       .conso-#id#-row > text {
         color: white !important;
-        /*color: var(--link-color) !important;
-          fill: var(--link-color) !important;*/
       }
 
       #consoDaily#uid# > .carousel-control {
@@ -62,7 +60,11 @@
       #consoDaily#uid# {
           margin-top: 5px;
       }
-      
+
+      #consoDaily#uid# .highcharts-title {
+          fill: var(--link-color) !important;
+      }
+
   </style>
 
     <template>
@@ -70,6 +72,8 @@
         <div>maxWidth : 150 ({{Largeur maximale en pixel}})</div>
         <div>days : 3 ({{Nombre de jours à afficher}})</div>
         <div>groupType : sum::hour ({{Groupement des barres à afficher}})</div>
+        <div>inner : 60 ({{Hauteur de part}})</div>
+        <div>derive : 0 ({{Hauteur de part}})</div>
     </template>
 
     <script src="core/php/getJS.php?file=plugins/beem/3rdparty/variable-pie.js" type="text/javascript"></script>
@@ -78,7 +82,8 @@
         var cmd_width = is_numeric('#width#') ? parseFloat('#width#') : 160;
         var days_to_print = is_numeric('#days#') ? parseFloat('#days#') : 3;
         var group_type = !isNaN('#groupType#') ? '#groupType#' : 'sum::hour';
-        const pie_size = is_numeric('#inner#') && '#inner#' >= 25 ? '#inner#' <= 80 ? '#inner#' : 80 : 60;
+        const derive = !isNaN('#derive#') ? '#derive#' : 0;
+        const pie_size#id# = is_numeric('#inner#') && '#inner#' >= 25 ? '#inner#' <= 80 ? '#inner#' : 80 : 60;
         const getDaysBefore#id# = (nbDay = 1) => (
             new Date(Date.now() - nbDay * 864e5).toISOString().slice(0, 10)
         );
@@ -99,7 +104,7 @@
                     dataRange: '1 day',
                     dateStart: _options.start,
                     dateEnd: _options.end,
-                    derive: '',
+                    derive: _options.derive,
                     allowZero: 0,
                     groupingType: _options.groupType,
                     lastPointToEnd: 0,
@@ -271,7 +276,7 @@
                 html += '    <div id="variablePie' + i + '" class="conso-#id#-row">';
                 html += '    </div>';
                 html += '</div>';
-              
+
                 htmlCarou += '<li data-target="#consoDaily#uid#" data-slide-to="'+(days_to_print-i)+'" class="'+active+'"></li>'
             }
             cmd.querySelector('#contain').innerHTML += html;
@@ -280,6 +285,7 @@
             for (var i = days_to_print; i >= 1; i--) {
                 let array = {
                     id: 'variablePie' + i,
+                    derive: derive,
                     groupType: group_type,
                     height: cmd_height,
                     width: cmd_width,
@@ -287,7 +293,7 @@
                     printDay: i === 1 ? 'Hier' : i === 2 ? 'Avant-hier' : `Il y a ${i} j`,
                     end: getDaysBefore#id#(i),
                     start: getDaysBefore#id#(i + 1),
-                    innerSize: pie_size
+                    innerSize: pie_size#id#
                 };
                 drawVariablePie(array);
             }
