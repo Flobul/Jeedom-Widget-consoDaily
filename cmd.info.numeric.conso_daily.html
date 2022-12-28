@@ -44,6 +44,12 @@
           justify-content: space-evenly;
       }
 
+      .conso-#id#-row > text {
+        color: white !important;
+        /*color: var(--link-color) !important;
+          fill: var(--link-color) !important;*/
+      }
+
       #consoDaily#uid# > .carousel-control {
           position: absolute;
           top: 25%;
@@ -72,8 +78,8 @@
         var cmd_width = is_numeric('#width#') ? parseFloat('#width#') : 160;
         var days_to_print = is_numeric('#days#') ? parseFloat('#days#') : 3;
         var group_type = !isNaN('#groupType#') ? '#groupType#' : 'sum::hour';
-
-        const getDaysBefore = (nbDay = 1) => (
+        const pie_size = is_numeric('#inner#') && '#inner#' >= 25 ? '#inner#' <= 80 ? '#inner#' : 80 : 25;
+        const getDaysBefore#id# = (nbDay = 1) => (
             new Date(Date.now() - nbDay * 864e5).toISOString().slice(0, 10)
         );
 
@@ -173,22 +179,40 @@
                             events: {
                                 load: function() {
                                     var fontSize = (this.chartWidth < 190) ? '10px' : '12px';
-                                    var ecart = this.chartHeight / 7;
+                                    var ecart = 0;
+                                    if (_options.innerSize <= 30) {
+                                        ecart = 10;
+                                    } else if (_options.innerSize <= 40) {
+                                        ecart = 14;
+                                    } else if (_options.innerSize <= 50) {
+                                        ecart = 20;
+                                    } else if (_options.innerSize <= 60) {
+                                        ecart = 24;
+                                    } else if (_options.innerSize <= 70) {
+                                        ecart = 30;
+                                    } else if (_options.innerSize <= 80) {
+                                        ecart = 36;
+                                    }
+
                                     this.renderer.text('0h', this.chartWidth / 2, this.chartHeight / 2 - ecart).attr({
                                         align: 'center',
-                                        'font-size': fontSize
+                                        'font-size': fontSize,
+                                        'fill': 'var(--link-color)'
                                     }).add()
                                     this.renderer.text('6h', this.chartWidth / 2 + ecart, this.chartHeight / 2).attr({
                                         align: 'center',
-                                        'font-size': fontSize
+                                        'font-size': fontSize,
+                                        'fill': 'var(--link-color)'
                                     }).add()
                                     this.renderer.text('12h', this.chartWidth / 2, this.chartHeight / 2 + ecart).attr({
                                         align: 'center',
-                                        'font-size': fontSize
+                                        'font-size': fontSize,
+                                        'fill': 'var(--link-color)'
                                     }).add()
                                     this.renderer.text('18h', this.chartWidth / 2 - ecart, this.chartHeight / 2).attr({
                                         align: 'center',
-                                        'font-size': fontSize
+                                        'font-size': fontSize,
+                                        'fill': 'var(--link-color)'
                                     }).add()
                                 }
                             }
@@ -227,9 +251,9 @@
                         subtitle: false,
                         series: [{
                             minPointSize: 10,
-                            innerSize: '50%',
+                            innerSize: _options.innerSize + '%',
                             zMin: 0,
-                            name: 'Consommation',
+                            name: '',
                             sizeBy: 'radius',
                             data: series
                         }]
@@ -261,21 +285,15 @@
                     width: cmd_width,
                     days: days_to_print,
                     printDay: i === 1 ? 'Hier' : i === 2 ? 'Avant-hier' : `Il y a ${i} j`,
-                    end: getDaysBefore(i),
-                    start: getDaysBefore(i + 1),
+                    end: getDaysBefore#id#(i),
+                    start: getDaysBefore#id#(i + 1),
+                    innerSize: pie_size
                 };
                 drawVariablePie(array);
             }
         }
 
-        $('.right.carousel-control.my#id#').on('click', function () {
-            $('#consoDaily#uid#').carousel('next');
-            console.log('carou right',$('#consoDaily#uid#'))
-        });
-
-        $('.left.carousel-control.my#id#').on('click', function () {
-            $('#consoDaily#uid#').carousel('prev');
-            console.log('carou left',$('#consoDaily#uid#'))
-        });
+        cmd.querySelector('.right.carousel-control.my#id#').addEventListener('click', document.querySelector('#consoDaily#uid#').prev);
+        cmd.querySelector('.left.carousel-control.my#id#').addEventListener('click', document.querySelector('#consoDaily#uid#').next);
     </script>
 </div>
