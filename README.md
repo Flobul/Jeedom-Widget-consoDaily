@@ -13,9 +13,15 @@ Configurable dans les paramètres optionnels du widget :
 - days : 3 (Nombre de jours à afficher)
 - groupType : sum::hour (Groupement des barres à afficher)
 - inner : 60 (Largeur de la part)
+- derive : 0 (Variation de valeur)
+
 
 Importer les modules suivants et pointer leur emplacement dans le code.
 https://code.highcharts.com/modules/variable-pie.js
 https://code.highcharts.com/modules/variable-pie.js.map
 
 ![Dashboard par défaut](/img/DashboardDefault.png)
+
+
+Production solaire affichée en 24h :
+![Dashboard prod day](/img/DashboardProdDay.png)
