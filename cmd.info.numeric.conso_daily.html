@@ -6,7 +6,7 @@
         <div id="consoDaily#uid#" class="carousel slide conso-#id#-space" data-ride="carousel" data-pause="hover" data-interval="false">
           <ol class="carousel-indicators">
           </ol>
-          <div class="carousel-inner slide#id#" id="contain">
+          <div class="carousel-inner slide#id#" id="contain#id#">
           </div>
             <a class="left carousel-control my#id#" href="#consoDaily#uid#" data-slide="prev"
                 style="background:transparent">
@@ -78,6 +78,7 @@
 
     <script src="core/php/getJS.php?file=plugins/beem/3rdparty/variable-pie.js" type="text/javascript"></script>
     <script>
+        var cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]');
         var cmd_height = is_numeric('#maxHeight#') ? parseFloat('#maxHeight#') : 160;
         var cmd_width = is_numeric('#width#') ? parseFloat('#width#') : 160;
         var days_to_print = is_numeric('#days#') ? parseFloat('#days#') : 3;
@@ -125,26 +126,16 @@
                         return;
                     }
                     if (data.result.data.length < 1) {
-                        if (_params.option.displayAlert == false) {
-                            return
+                        var message = '{{Il n\'existe encore aucun historique pour cette commande :}} ' + data.result.history_name;
+                        if (init(data.result.dateStart) != '') {
+                            message += (init(data.result.dateEnd) != '') ? ' {{du}} ' + data.result.dateStart + ' {{au}} ' + data.result.dateEnd : ' {{à partir de}} ' + data.result.dateStart;
+                        } else {
+                            message += (init(data.result.dateEnd) != '') ? ' {{jusqu\'au}} ' + data.result.dateEnd : '';
                         }
-                        if (!_params.noError) {
-                            var message = '{{Il n\'existe encore aucun historique pour cette commande :}} ' + data.result.history_name;
-                            if (init(data.result.dateStart) != '') {
-                                message += (init(data.result.dateEnd) != '') ? ' {{du}} ' + data.result.dateStart + ' {{au}} ' + data.result.dateEnd : ' {{à partir de}} ' + data.result.dateStart;
-                            } else {
-                                message += (init(data.result.dateEnd) != '') ? ' {{jusqu\'au}} ' + data.result.dateEnd : '';
-                            }
-                            jeedomUtils.showAlert({
-                                message: message,
-                                level: 'warning'
-                            });
-                            if (typeof(init(_params.success)) === 'function') {
-                                _params.success({
-                                    'error': message
-                                })
-                            }
-                        }
+                        jeedomUtils.showAlert({
+                            message: message,
+                            level: 'warning'
+                        });
                         return
                     }
 
@@ -169,7 +160,6 @@
                             title: ''
                         });
                     };
-
                     Highcharts.chart(_options.id, {
                         chart: {
                             spacingTop: 0,
@@ -267,24 +257,24 @@
             });
         }
 
-        if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
+        if (is_object(cmd)) {
             let html = '';
             let htmlCarou = '';
             for (var i = days_to_print; i >= 1; i--) {
                 var active = (i == 1)?'active':'';
                 html += '<div class="item '+active+'" data-interval="15000">';
-                html += '    <div id="variablePie' + i + '" class="conso-#id#-row">';
+                html += '    <div id="variablePie#id#' + i + '" class="conso-#id#-row">';
                 html += '    </div>';
                 html += '</div>';
 
                 htmlCarou += '<li data-target="#consoDaily#uid#" data-slide-to="'+(days_to_print-i)+'" class="'+active+'"></li>'
             }
-            cmd.querySelector('#contain').innerHTML += html;
+            cmd.querySelector('#contain#id#').innerHTML += html;
             cmd.querySelector('.carousel-indicators').innerHTML += htmlCarou;
 
             for (var i = days_to_print; i >= 1; i--) {
                 let array = {
-                    id: 'variablePie' + i,
+                    id: 'variablePie#id#' + i,
                     derive: derive,
                     groupType: group_type,
                     height: cmd_height,
