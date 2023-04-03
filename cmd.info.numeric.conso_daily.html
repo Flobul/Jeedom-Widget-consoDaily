@@ -119,23 +119,9 @@
                 },
                 success: function(data) {
                     if (data.state != 'ok') {
-                        jeedomUtils.showAlert({
-                            message: data.result,
-                            level: 'danger'
-                        });
                         return;
                     }
                     if (data.result.data.length < 1) {
-                        var message = '{{Il n\'existe encore aucun historique pour cette commande :}} ' + data.result.history_name;
-                        if (init(data.result.dateStart) != '') {
-                            message += (init(data.result.dateEnd) != '') ? ' {{du}} ' + data.result.dateStart + ' {{au}} ' + data.result.dateEnd : ' {{à partir de}} ' + data.result.dateStart;
-                        } else {
-                            message += (init(data.result.dateEnd) != '') ? ' {{jusqu\'au}} ' + data.result.dateEnd : '';
-                        }
-                        jeedomUtils.showAlert({
-                            message: message,
-                            level: 'warning'
-                        });
                         return
                     }
 
@@ -225,7 +211,7 @@
                             pointFormatter: function() {
                                 return '<span style="color:' + this.color + '">' +
                                     Highcharts.dateFormat('%d-%m-%Y %H:%M', this.y) + '</span><br/>' +
-                                    '<b>' + Highcharts.numberFormat(this.z) + ' Wh</b>';
+                                    '<b>' + Highcharts.numberFormat(this.z) + ' #unite#</b>';
                             },
                             headerFormat: ''
                         },
