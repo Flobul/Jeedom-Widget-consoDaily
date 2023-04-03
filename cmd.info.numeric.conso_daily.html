@@ -82,9 +82,9 @@
         var cmd_width = is_numeric('#width#') ? parseFloat('#width#') : 160;
         var days_to_print = is_numeric('#days#') ? parseFloat('#days#') : 3;
         var group_type = !isNaN('#groupType#') ? '#groupType#' : 'sum::hour';
-        const derive = !isNaN('#derive#') ? '#derive#' : 0;
-        const pie_size#id# = is_numeric('#inner#') && '#inner#' >= 25 ? '#inner#' <= 80 ? '#inner#' : 80 : 60;
-        const getDaysBefore#id# = (nbDay = 1) => (
+        var derive = !isNaN('#derive#') ? '#derive#' : 0;
+        var pie_size#id# = is_numeric('#inner#') && '#inner#' >= 25 ? '#inner#' <= 80 ? '#inner#' : 80 : 60;
+        var getDaysBefore#id# = (nbDay = 1) => (
             new Date(Date.now() - nbDay * 864e5).toISOString().slice(0, 10)
         );
 
@@ -290,7 +290,7 @@
                     height: cmd_height,
                     width: cmd_width,
                     days: days_to_print,
-                    printDay: i === 1 ? 'Hier' : i === 2 ? 'Avant-hier' : `Il y a ${i} j`,
+                    printDay: i === 1 ? 'Avant-hier' : `Il y a ${i} j`,
                     end: getDaysBefore#id#(i),
                     start: getDaysBefore#id#(i + 1),
                     innerSize: pie_size#id#
