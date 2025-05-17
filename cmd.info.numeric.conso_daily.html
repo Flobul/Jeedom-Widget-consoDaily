@@ -2,17 +2,17 @@
     <div class="title #hide_name#">
         <div class="cmdName">#name_display#</div>
     </div>
-    <div id="conso-#id#-container">
-        <div id="consoDaily#uid#" class="carousel slide conso-#id#-space" data-ride="carousel" data-pause="hover" data-interval="false">
+    <div id="consoContainer#id#">
+        <div id="consoDaily#id#" class="carousel slide consoSpace#id#" data-ride="carousel" data-pause="hover" data-interval="false">
           <ol class="carousel-indicators">
           </ol>
           <div class="carousel-inner slide#id#" id="contain#id#">
           </div>
-            <a class="left carousel-control my#id#" href="#consoDaily#uid#" data-slide="prev"
+            <a class="left carousel-control my#id#" href="#consoDaily#id#" data-slide="prev"
                 style="background:transparent">
                 <i #hidden# class="fas fa-chevron-left"></i>
             </a>
-            <a class="right carousel-control my#id#" href="#consoDaily#uid#" data-slide="next"
+            <a class="right carousel-control my#id#" href="#consoDaily#id#" data-slide="next"
                 style="background:transparent">
                 <i #hidden# class="fas fa-chevron-right"></i>
             </a>
@@ -20,35 +20,35 @@
      </div>
   <style>
 
-      #consoDaily#uid# .carousel-indicators li {
-          width: 16px;
-          height: 4px;
+      #consoDaily#id# .carousel-indicators li {
+          width: 20px;
+          height: 5px;
           background-color: grey;
       }
 
-      #consoDaily#uid# .carousel-indicators li.active {
+      #consoDaily#id# .carousel-indicators li.active {
           background-color: black;
 
       }
 
-      #consoDaily#uid# .carousel-indicators  {
+      #consoDaily#id# .carousel-indicators  {
           bottom: 8px;
           width: 100%;
           margin-left: -50%;
       }
 
-      .conso-#id#-row {
+      .consoRow#id# {
           display: flex;
           align-items: center;
           flex-direction: row;
           justify-content: space-evenly;
       }
 
-      .conso-#id#-row > text {
+      .consoRow#id# > text {
         color: white !important;
       }
 
-      #consoDaily#uid# > .carousel-control {
+      #consoDaily#id# > .carousel-control {
           position: absolute;
           top: 25%;
           z-index: 5;
@@ -57,11 +57,11 @@
           width: 15px;
       }
 
-      #consoDaily#uid# {
+      #consoDaily#id# {
           margin-top: 5px;
       }
 
-      #consoDaily#uid# .highcharts-title {
+      #consoDaily#id# .highcharts-title {
           fill: var(--link-color) !important;
       }
 
@@ -78,12 +78,11 @@
 
     <script src="core/php/getJS.php?file=plugins/beem/3rdparty/variable-pie.js" type="text/javascript"></script>
     <script>
-        var cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]');
-        var cmd_height = is_numeric('#maxHeight#') ? parseFloat('#maxHeight#') : 160;
-        var cmd_width = is_numeric('#width#') ? parseFloat('#width#') : 160;
-        var days_to_print = is_numeric('#days#') ? parseFloat('#days#') : 3;
-        var group_type = !isNaN('#groupType#') ? '#groupType#' : 'sum::hour';
-        var derive = !isNaN('#derive#') ? '#derive#' : 0;
+        var cmd_height#id# = is_numeric('#maxHeight#') ? parseFloat('#maxHeight#') : 160;
+        var cmd_width#id# = is_numeric('#width#') ? parseFloat('#width#') : 160;
+        var days_to_print#id# = is_numeric('#days#') ? parseFloat('#days#') : 3;
+        var group_type#id# = !isNaN('#groupType#') ? '#groupType#' : 'sum::hour';
+        var derive#id# = !isNaN('#derive#') ? '#derive#' : 0;
         var pie_size#id# = is_numeric('#inner#') && '#inner#' >= 25 ? '#inner#' <= 80 ? '#inner#' : 80 : 60;
         var getDaysBefore#id# = (nbDay = 1) => (
             new Date(Date.now() - nbDay * 864e5).toISOString().slice(0, 10)
@@ -96,7 +95,7 @@
         }
 
         function drawVariablePie(_options) {
-            $.ajax({
+            domUtils.ajax({
                 type: "POST",
                 url: "core/ajax/cmd.ajax.php",
                 data: {
@@ -146,6 +145,7 @@
                             title: ''
                         });
                     };
+console.log("Détail data.result.data:", _options, series);
                     Highcharts.chart(_options.id, {
                         chart: {
                             spacingTop: 0,
@@ -243,38 +243,38 @@
             });
         }
 
-        if (is_object(cmd)) {
+        if (document.querySelector('.cmd[data-cmd_id="#id#"]')) {
             let html = '';
             let htmlCarou = '';
-            for (var i = days_to_print; i >= 1; i--) {
-                var active = (i == 1)?'active':'';
+            for (var i = days_to_print#id#; i >= 0; i--) {
+                var active = (i == 0)?'active':'';
                 html += '<div class="item '+active+'" data-interval="15000">';
-                html += '    <div id="variablePie#id#' + i + '" class="conso-#id#-row">';
+                html += '    <div id="variablePie#id#' + i + '" class="consoRow#id#">';
                 html += '    </div>';
                 html += '</div>';
 
-                htmlCarou += '<li data-target="#consoDaily#uid#" data-slide-to="'+(days_to_print-i)+'" class="'+active+'"></li>'
+                htmlCarou += '<li data-target="#consoDaily#id#" data-slide-to="'+(days_to_print#id#-i)+'" class="'+active+'"></li>'
             }
-            cmd.querySelector('#contain#id#').innerHTML += html;
-            cmd.querySelector('.carousel-indicators').innerHTML += htmlCarou;
+            document.getElementById('contain#id#').innerHTML += html;
+            document.querySelector('.cmd[data-cmd_id="#id#"] .carousel-indicators').innerHTML += htmlCarou;
 
-            for (var i = days_to_print; i >= 1; i--) {
+            for (var i = days_to_print#id#; i >= 0; i--) {
                 let array = {
                     id: 'variablePie#id#' + i,
-                    derive: derive,
-                    groupType: group_type,
-                    height: cmd_height,
-                    width: cmd_width,
-                    days: days_to_print,
-                    printDay: i === 1 ? 'Avant-hier' : `Il y a ${i} j`,
-                    end: getDaysBefore#id#(i),
-                    start: getDaysBefore#id#(i + 1),
+                    derive: derive#id#,
+                    groupType: group_type#id#,
+                    height: cmd_height#id#,
+                    width: cmd_width#id#,
+                    days: days_to_print#id#,
+                    printDay: i === 0 ? '{{Hier}}' : i === 1 ? '{{Avant-hier}}' : `{{Il y a}} ${i+1} j`,
+                    start: getDaysBefore#id#(i+1),
+                    end: getDaysBefore#id#(i+1) + ' 23:59:59',
                     innerSize: pie_size#id#
                 };
                 drawVariablePie(array);
             }
-            cmd.querySelector('.right.carousel-control.my#id#').addEventListener('click', document.querySelector('#consoDaily#uid#').prev);
-            cmd.querySelector('.left.carousel-control.my#id#').addEventListener('click', document.querySelector('#consoDaily#uid#').next);
+            document.querySelector('.cmd[data-cmd_id="#id#"] .right.carousel-control.my#id#').addEventListener('click', document.getElementById('consoDaily#id#').prev);
+            document.querySelector('.cmd[data-cmd_id="#id#"] .left.carousel-control.my#id#').addEventListener('click', document.getElementById('consoDaily#id#').next);
         }
     </script>
 </div>
