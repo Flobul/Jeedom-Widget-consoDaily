@@ -19,35 +19,29 @@
         </div>
      </div>
   <style>
-
       #consoDaily#id# .carousel-indicators li {
           width: 20px;
           height: 5px;
           background-color: grey;
       }
-
       #consoDaily#id# .carousel-indicators li.active {
           background-color: black;
 
       }
-
       #consoDaily#id# .carousel-indicators  {
           bottom: 8px;
           width: 100%;
           margin-left: -50%;
       }
-
       .consoRow#id# {
           display: flex;
           align-items: center;
           flex-direction: row;
           justify-content: space-evenly;
       }
-
       .consoRow#id# > text {
         color: white !important;
       }
-
       #consoDaily#id# > .carousel-control {
           position: absolute;
           top: 25%;
@@ -56,17 +50,13 @@
           margin-top: 0px;
           width: 15px;
       }
-
       #consoDaily#id# {
           margin-top: 5px;
       }
-
       #consoDaily#id# .highcharts-title {
           fill: var(--link-color) !important;
       }
-
   </style>
-
     <template>
         <div>maxHeight : 150 ({{Hauteur maximale en pixel}})</div>
         <div>maxWidth : 150 ({{Largeur maximale en pixel}})</div>
@@ -124,28 +114,42 @@
                         return
                     }
 
-                    var minVal = data.result.data[0][1];
-                    var maxVal = data.result.data[0][1];
-                    data.result.data.forEach(function(prev) {
-                        if (maxVal < prev[1]) maxVal = prev[1];
-                        if (minVal > prev[1]) minVal = prev[1];
-                    })
+                    // Regrouper par heure avec la somme
+                    let groupedData = {};
+                    data.result.data.forEach(function(point) {
+                        // Arrondir à l'heure
+                        let hour = new Date(point[0]).setMinutes(0, 0, 0);
+                        if (!groupedData[hour]) {
+                            groupedData[hour] = 0;  // On initialise directement avec 0
+                        }
+                        groupedData[hour] += point[1];  // On ajoute la valeur (somme)
+                    });
+
+                    // Convertir les données groupées en série
+                    let processedData = Object.entries(groupedData).map(([timestamp, sum]) => ({
+                        y: parseInt(timestamp),
+                        z: sum  // On utilise directement la somme, pas de division
+                    }));
+
+                    // Calculer min/max sur les données réduites
+                    var minVal = Math.min(...processedData.map(d => d.z));
+                    var maxVal = Math.max(...processedData.map(d => d.z));
                     var countsArr = {
                         green: minVal,
                         orange: (maxVal + minVal) / 2,
                         red: maxVal
-                    }
-
-                    var series = [];
-                    for (var i in data.result.data) {
-                        series.push({
-                            color: pieColors(countsArr, data.result.data[i][1]),
-                            y: data.result.data[i][0],
-                            z: data.result.data[i][1],
-                            title: ''
-                        });
                     };
-console.log("Détail data.result.data:", _options, series);
+
+                    // Créer la série finale
+                    var series = processedData.map(point => ({
+                        color: pieColors(countsArr, point.z),
+                        y: point.y,
+                        z: point.z,
+                        title: ''
+                    }));
+
+                    console.log("Données réduites:", series.length, "points au lieu de", data.result.data.length);
+                    console.log("Valeurs min/max:", minVal, maxVal);  // Pour debug
                     Highcharts.chart(_options.id, {
                         chart: {
                             spacingTop: 0,
@@ -246,7 +250,7 @@ console.log("Détail data.result.data:", _options, series);
         if (document.querySelector('.cmd[data-cmd_id="#id#"]')) {
             let html = '';
             let htmlCarou = '';
-            for (var i = days_to_print#id#; i >= 0; i--) {
+            for (var i = days_to_print#id#-1; i >= 0; i--) {
                 var active = (i == 0)?'active':'';
                 html += '<div class="item '+active+'" data-interval="15000">';
                 html += '    <div id="variablePie#id#' + i + '" class="consoRow#id#">';
@@ -258,7 +262,7 @@ console.log("Détail data.result.data:", _options, series);
             document.getElementById('contain#id#').innerHTML += html;
             document.querySelector('.cmd[data-cmd_id="#id#"] .carousel-indicators').innerHTML += htmlCarou;
 
-            for (var i = days_to_print#id#; i >= 0; i--) {
+            for (var i = days_to_print#id#-1; i >= 0; i--) {
                 let array = {
                     id: 'variablePie#id#' + i,
                     derive: derive#id#,
@@ -267,14 +271,19 @@ console.log("Détail data.result.data:", _options, series);
                     width: cmd_width#id#,
                     days: days_to_print#id#,
                     printDay: i === 0 ? '{{Hier}}' : i === 1 ? '{{Avant-hier}}' : `{{Il y a}} ${i+1} j`,
-                    start: getDaysBefore#id#(i+1),
+                    start: getDaysBefore#id#(i+1) + ' 00:00:00',
                     end: getDaysBefore#id#(i+1) + ' 23:59:59',
                     innerSize: pie_size#id#
                 };
                 drawVariablePie(array);
             }
-            document.querySelector('.cmd[data-cmd_id="#id#"] .right.carousel-control.my#id#').addEventListener('click', document.getElementById('consoDaily#id#').prev);
-            document.querySelector('.cmd[data-cmd_id="#id#"] .left.carousel-control.my#id#').addEventListener('click', document.getElementById('consoDaily#id#').next);
+            document.querySelector('.cmd[data-cmd_id="#id#"] .right.carousel-control.my#id#').addEventListener('click', () => {
+                $('#consoDaily#id#').carousel('next');  
+            });
+            document.querySelector('.cmd[data-cmd_id="#id#"] .left.carousel-control.my#id#').addEventListener('click', () => {
+                $('#consoDaily#id#').carousel('prev');
+            });
+
         }
     </script>
 </div>
